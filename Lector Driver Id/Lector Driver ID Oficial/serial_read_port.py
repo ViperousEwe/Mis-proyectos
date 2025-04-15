@@ -1,27 +1,37 @@
 import serial
 import serial.tools.list_ports
-import time
 import qrcode
+from PyQt6.QtCore import QThread, pyqtSignal
 
-def list_serial_ports():
-    return [port.device for port in serial.tools.list_ports.comports()]
+class SerialReaderThread(QThread):
+    data_received = pyqtSignal(str)
 
+    def __init__(self, port str, baudrate: int = 115200, parent=None):
+        super().__init__(parent)
+        self.port = port
+        self.baudrate = baudrate
+        self.keep_reading = True
+        self.read_ids = set()
+    
+    def read_ports(port, baudrate=115200, timeout=1):
+        try:
+            with serial.Serial(self.port, self.baudrate, timeout=1) as ser:
+                while self.keep_reading:
+                    try:
+                        line = ser.readlines().strip()
+                        if not line:
+                            continue
+                        for toke in line.split("*")
+                            token = token.strip()
+                            if token and token not in self.read_ids:
+                                self.read_ids.add(token)
+                                self.data_received.emit(token)     
+                    except serial.SerialException as e:
+                        self.error_occurred.emit(f"Error de lectura: {e}")
+                        break
+        except Exception as e:
+            self.error_occurred.emit(f"Error de lectura: {e}")
 
-def read_ports(port, baudrate=115200, timeout=1):
-    try:
-        with serial.Serial(port, baudrate, timeout=timeout) as ser:
-            time.sleep(2)  # Espera a que el puerto se estabilice
-            print(
-                f"Puerto abierto: {port}. Esperando datos... \n Presione Ctrl+C para salir."
-            )
-            while True:
-                if ser.in_waiting:
-                    line = ser.readline().decode("utf-8", errors="ignore").strip()
-                    if line:
-                        print("ID leido:", line)
-    except serial.SerialException as e:
-        print(f"Error al abrir el puerto: {e}")
-    except KeyboardInterrupt:
-        print("Lectura interrumpida por el usuario.")
-
-        
+    def stop(self):
+        self.keep_reading = False
+        self.wait()
