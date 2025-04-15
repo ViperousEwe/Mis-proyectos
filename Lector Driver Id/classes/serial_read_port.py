@@ -16,7 +16,7 @@ def read_ports(port, baudrate=115200, timeout=1):
             )
             while True:
                 if ser.in_waiting:
-                    line = ser.readline().decode("utf-8", errors="ignore").split("*").strip()
+                    line = ser.readline().decode("utf-8", errors="ignore").strip()
                     if line:
                         print("ID leido:", line)
     except serial.SerialException as e:
@@ -24,5 +24,4 @@ def read_ports(port, baudrate=115200, timeout=1):
     except KeyboardInterrupt:
         print("Lectura interrumpida por el usuario.")
 
-def create_qr_code():
-    
+        
