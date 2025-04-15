@@ -8,10 +8,10 @@ from PyQt6.QtWidgets import (
     QPushButton,
     QMessageBox,
     QTextEdit,
+    QApplication
 )
 
 from serial_read_port import SerialReaderThread
-
 
 class SerialReaderApp(QWidget):
     def __init__(self):
@@ -52,6 +52,7 @@ class SerialReaderApp(QWidget):
 
         self.reader_thread = SerialReaderThread(port)
         self.reader_thread.data_received.connect(self.show_id)
+        self.reader_thread.error_occurred.connect(self.show_error)
         self.reader_thread.start()
 
         self.start_button.setEnabled(False)
@@ -61,10 +62,14 @@ class SerialReaderApp(QWidget):
     def show_id(self, read_ids):
         self.text_ids.append(f"{read_ids}")
 
+    def show_error(self, message):
+        QMessageBox.warning(self, "Error", message)
+        self.stop_reading()
+        QAplication.quit()
+
     def stop_reading(self):
         if self.reader_thread:
             self.reader_thread.stop()
-
             self.reader_thread = None
         self.start_button.setEnabled(True)
         self.stop_button.setEnabled(False)

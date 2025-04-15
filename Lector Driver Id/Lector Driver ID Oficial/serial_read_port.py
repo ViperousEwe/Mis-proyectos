@@ -4,12 +4,16 @@ from PyQt6.QtCore import QThread, pyqtSignal
 
 class SerialReaderThread(QThread):
     data_received = pyqtSignal(str)
+    error_occurred = pyqtSignal(str)
 
     def __init__(self, port):
         super().__init__()
         self.port = port
         self.read_ids = set()
         self.keep_reading = True
+
+    def run(self):
+        self.read_ports()
 
     def read_ports(self):
         try:
@@ -22,7 +26,7 @@ class SerialReaderThread(QThread):
                             self.read_ids.add(id_clean)
                             self.data_received.emit(id_clean)
         except Exception as e:
-            self.data_received.emit(f"Error de lectura: {e}")
+            self.error_occurred.emit(f"Error al leer el puerto: {str(e)}")
 
     def stop(self):
         self.keep_reading = False
