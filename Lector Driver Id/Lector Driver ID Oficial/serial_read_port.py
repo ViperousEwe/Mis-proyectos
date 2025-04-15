@@ -14,8 +14,8 @@ class SerialReaderThread(QThread):
     def read_ports(self):
         try:
             with serial.Serial(self.port, 115200, timeout=1) as ser:
-                while self.keep_reading is True:
-                    line = ser.readlines().strip()
+                while self.keep_reading:
+                    line = ser.readline().decode("utf-8", errors="ignore").strip()
                     for id_raw in line.split("*"):
                         id_clean = id_raw.strip()
                         if id_clean and id_clean not in self.read_ids:
