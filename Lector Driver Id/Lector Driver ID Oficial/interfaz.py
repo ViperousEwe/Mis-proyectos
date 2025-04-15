@@ -1,13 +1,19 @@
 import serial
 import serial.tools.list_ports
 from PyQt6.QtWidgets import (
-    QWidget, QLabel, QVBoxLayout,
-    QComboBox, QPushButton, QMessageBox, QTextEdit
+    QWidget,
+    QLabel,
+    QVBoxLayout,
+    QComboBox,
+    QPushButton,
+    QMessageBox,
+    QTextEdit,
 )
 
 from serial_read_port import SerialReaderThread
 
-class SerialReaderApp (QWidget):
+
+class SerialReaderApp(QWidget):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Lector de Serial")
@@ -58,8 +64,8 @@ class SerialReaderApp (QWidget):
     def stop_reading(self):
         if self.reader_thread:
             self.reader_thread.stop()
-        
+
             self.reader_thread = None
         self.start_button.setEnabled(True)
         self.stop_button.setEnabled(False)
-        QMessageBox.information(self, "Detener Lectura", "Lectura detenida.")     
+        QMessageBox.information(self, "Detener Lectura", "Lectura detenida.")

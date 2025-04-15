@@ -1,34 +1,28 @@
 import serial
 from PyQt6.QtCore import QThread, pyqtSignal
 
+
 class SerialReaderThread(QThread):
     data_received = pyqtSignal(str)
 
-    def __init__(self, port: str, baudrate: int = 115200, parent=None):
-        super().__init__(parent)
+    def __init__(self, port):
+        super().__init__()
         self.port = port
-        self.baudrate = baudrate
-        self.keep_reading = True
         self.read_ids = set()
-    
-    def read_ports(port, baudrate=115200, timeout=1):
+        self.keep_reading = True
+
+    def read_ports(self):
         try:
-            with serial.Serial(self.port, self.baudrate, timeout=1) as ser:
+            with serial.Serial(self.port, 115200, timeout=1) as ser:
                 while self.keep_reading is True:
-                    try:
-                        line = ser.readlines().strip()
-                        if not line:
-                            continue
-                        for toke in line.split("*"):
-                            token = token.strip()
-                            if token and token not in self.read_ids:
-                                self.read_ids.add(token)
-                                self.data_received.emit(token)
-                    except serial.SerialException as e:
-                        self.error_occurred.emit(f"Error de lectura: {e}")
-                        break
+                    line = ser.readlines().strip()
+                    for id_raw in line.split("*"):
+                        id_clean = id_raw.strip()
+                        if id_clean and id_clean not in self.read_ids:
+                            self.read_ids.add(id_clean)
+                            self.data_received.emit(id_clean)
         except Exception as e:
-            self.error_occurred.emit(f"Error de lectura: {e}")
+            self.data_received.emit(f"Error de lectura: {e}")
 
     def stop(self):
         self.keep_reading = False
