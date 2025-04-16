@@ -1,4 +1,6 @@
 import serial
+import qrcode
+from PIL import Image, ImageDraw, ImageFont
 from PyQt6.QtCore import QThread, pyqtSignal
 
 
@@ -27,6 +29,37 @@ class SerialReaderThread(QThread):
                             self.data_received.emit(id_clean)
         except Exception as e:
             self.error_occurred.emit(f"Error al leer el puerto: {str(e)}")
+
+    def generate_qr_sheet(self, read_ids):
+
+        page_width = 2480
+        page_height = 3508
+        qr_size = 140
+        spacing = 30  # Space between the QR and the text
+        margin_x = 100
+        margin_y = 100
+        text_spacing = 10
+
+        page = Image.new("RGB", (page_width, page_height), "white")
+        draw = ImageDraw.Draw(page)
+        font = ImageFont.truetype("arial.ttf", 40)
+
+        x, y = margin_x, margin_y
+
+        for index, line in enumerate(read_ids):
+            qr = qrcode.make(line)
+            qr = qr.resize((qr_size, qr_size))
+            page.paste(qr, (x, y))
+
+            # Pasar a la siguiente fila
+            y += qr_size + text_spacing
+
+            if (
+                y + qr_size > page_height - 100
+            ):  # Si llegamos al final de la hoja, nueva columna
+                y = margin_y
+                x += qr_size + 400  # Avanzamos en X para la nueva columna
+        return page
 
     def stop(self):
         self.keep_reading = False
